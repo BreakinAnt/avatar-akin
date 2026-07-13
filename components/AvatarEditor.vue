@@ -1,20 +1,12 @@
 <template>
-    <svg width="0" height="0" style="position:absolute;overflow:hidden">
-        <defs>
-            <filter :id="`avatar-color-${index}`" v-for="(group, index) in groups" :key="`filter-${index}`" color-interpolation-filters="sRGB">
-                <feColorMatrix type="matrix"
-                    :values="`${group.active.r/255} 0 0 0 0  0 ${group.active.g/255} 0 0 0  0 0 ${group.active.b/255} 0 0  0 0 0 1 0`"
-                />
-            </filter>
-        </defs>
-    </svg>
     <div class="editor-root">
-        <div class="avatar-container">
-            <img v-for="(group, index) in groups" :key="`group-${index}`"
-                class="avatar"
-                :src="group.getActiveFilepath()"
-                :style="`z-index: ${group.index}; filter: url(#avatar-color-${index});`"
-            >
+        <div class="avatar-container" tabindex="0" title="Right-click → Copy Image for full picture" @copy.prevent="exportAvatar('copy')">
+            <canvas ref="avatarCanvas" class="avatar-canvas"></canvas>
+        </div>
+
+        <div class="avatar-export">
+            <button class="export-btn" @click="exportAvatar('download')">⬇ Download</button>
+            <button class="export-btn" @click="exportAvatar('copy')">⎘ Copy</button>
         </div>
 
         <div class="avatar-config">
@@ -70,6 +62,75 @@
     const avatar = new Avatar();
     const groups = ref(avatar.groups);
     const colors = ref(data.color_options);
+    const avatarCanvas = ref(null);
+    let renderToken = 0;
+
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    async function drawAvatar(canvas, snapshot) {
+        if (!canvas) return;
+        const token = ++renderToken;
+
+        const bg = await loadImage('/avatar/bgc.jpg');
+        if (token !== renderToken) return;
+
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+
+        for (const layer of snapshot) {
+            const img = await loadImage(layer.src);
+            if (token !== renderToken) return;
+
+            const tmp = document.createElement('canvas');
+            tmp.width = canvas.width;
+            tmp.height = canvas.height;
+            const tmpCtx = tmp.getContext('2d');
+            tmpCtx.drawImage(img, 0, 0, tmp.width, tmp.height);
+
+            const imgData = tmpCtx.getImageData(0, 0, tmp.width, tmp.height);
+            const d = imgData.data;
+            for (let i = 0; i < d.length; i += 4) {
+                d[i]     = d[i]     * layer.r / 255 | 0;
+                d[i + 1] = d[i + 1] * layer.g / 255 | 0;
+                d[i + 2] = d[i + 2] * layer.b / 255 | 0;
+            }
+            tmpCtx.putImageData(imgData, 0, 0);
+            ctx.drawImage(tmp, 0, 0);
+        }
+    }
+
+    watchEffect(() => {
+        const snapshot = groups.value
+            .filter(g => g.active)
+            .sort((a, b) => a.index - b.index)
+            .map(g => ({ src: g.getActiveFilepath(), r: g.active.r, g: g.active.g, b: g.active.b }));
+        drawAvatar(avatarCanvas.value, snapshot);
+    });
+
+    async function exportAvatar(mode = 'download') {
+        const canvas = avatarCanvas.value;
+        if (!canvas) return;
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        if (mode === 'copy') {
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        } else {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'avatar.png';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    }
 
     data.character.forEach((type, index) => {
         const group = new Group(type.name, index);
@@ -96,23 +157,24 @@
     }
 
     .avatar-container {
-        background-image: url(/avatar/bgc.jpg);
         width: 400px;
         height: 400px;
-        position: relative;
         border-radius: 12px;
         overflow: hidden;
         flex-shrink: 0;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        outline: none;
+        cursor: pointer;
     }
 
-    .avatar {
-        position: absolute;
-        top: 0;
-        left: 0;
+    .avatar-container:focus {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 3px rgba(49, 130, 206, 0.5);
+    }
+
+    .avatar-canvas {
+        display: block;
         width: 100%;
         height: 100%;
-        object-fit: contain;
     }
 
     .avatar-config {
@@ -209,5 +271,29 @@
         text-align: right;
         font-size: 12px;
         color: #999;
+    }
+
+    .avatar-export {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .export-btn {
+        flex: 1;
+        padding: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        font-size: 13px;
+        color: #444;
+        transition: all 0.15s;
+    }
+
+    .export-btn:hover {
+        background: #222;
+        color: white;
+        border-color: #222;
     }
 </style>
