@@ -1,9 +1,9 @@
 export class Feature {
-  constructor(name, filename, hue = 0, brightness = 0, saturation = 0) {
+  constructor(name, filename, r = 255, g = 255, b = 255) {
     this.name = name;
-    this.hue = hue;
-    this.brightness = brightness;
-    this.saturation = saturation;
+    this.r = r;
+    this.g = g;
+    this.b = b;
     this.filename = filename;
   }
 }

@@ -6,16 +6,16 @@
                 {
                     "name": "Default",
                     "filename": "default.png",
-                    "hue": 0,
-                    "saturation": 0,
-                    "brightness": 360
+                    "r": 255,
+                    "g": 220,
+                    "b": 185
                 },
                 {
                     "name": "Pretty",
                     "filename": "pretty.png",
-                    "hue": 0,
-                    "saturation": 0,
-                    "brightness": 360
+                    "r": 255,
+                    "g": 220,
+                    "b": 185
                 }
             ]
         },
@@ -25,16 +25,16 @@
                 {
                     "name": "Short",
                     "filename": "short.png",
-                    "hue": 0,
-                    "saturation": 0,
-                    "brightness": 0
+                    "r": 30,
+                    "g": 20,
+                    "b": 10
                 },
                 {
                     "name": "Long",
                     "filename": "long.png",
-                    "hue": 0,
-                    "saturation": 0,
-                    "brightness": 0
+                    "r": 30,
+                    "g": 20,
+                    "b": 10
                 }
             ]
         },
@@ -44,16 +44,16 @@
                 {
                     "name": "Default",
                     "filename": "default.png",
-                    "hue": 0,
-                    "saturation": 100,
-                    "brightness": 0
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
                 },
                 {
                     "name": "Pretty",
                     "filename": "pretty.png",
-                    "hue": 0,
-                    "saturation": 100,
-                    "brightness": 0
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
                 }
             ]
         }
@@ -62,45 +62,45 @@
     "color_options": [
         {
             "name": "Red",
-            "brightness": 57,
-            "hue": 300,
-            "saturation": 700
+            "r": 200,
+            "g": 50,
+            "b": 50
         },
         {
-            "name": "Blue berry",
-            "brightness": 35,
-            "hue": 191,
-            "saturation": 970
+            "name": "Blue Berry",
+            "r": 60,
+            "g": 30,
+            "b": 140
         },
         {
             "name": "Golden Glow",
-            "brightness": 90,
-            "hue": 325,
-            "saturation": 354
+            "r": 218,
+            "g": 165,
+            "b": 32
         },
         {
             "name": "Midnight Blue",
-            "brightness": 20,
-            "hue": 150,
-            "saturation": 790
+            "r": 25,
+            "g": 25,
+            "b": 112
         },
         {
             "name": "Black",
-            "brightness": 0,
-            "hue": 0,
-            "saturation": 0
+            "r": 0,
+            "g": 0,
+            "b": 0
         },
         {
             "name": "White",
-            "brightness": 100,
-            "hue": 0,
-            "saturation": 0
+            "r": 255,
+            "g": 255,
+            "b": 255
         },
         {
             "name": "Deep Bronze",
-            "brightness": 35,
-            "hue": 360,
-            "saturation": 973
+            "r": 100,
+            "g": 65,
+            "b": 30
         }
     ]
 }
