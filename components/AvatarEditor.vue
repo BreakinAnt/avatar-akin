@@ -65,10 +65,13 @@
     const avatarCanvas = ref(null);
     let renderToken = 0;
 
+    const imageCache = new Map();
+
     function loadImage(src) {
+        if (imageCache.has(src)) return Promise.resolve(imageCache.get(src));
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.onload = () => resolve(img);
+            img.onload = () => { imageCache.set(src, img); resolve(img); };
             img.onerror = reject;
             img.src = src;
         });
@@ -78,30 +81,39 @@
         if (!canvas) return;
         const token = ++renderToken;
 
-        const bg = await loadImage('/avatar/bgc.jpg');
+        // Fetch all images concurrently — cached after first load, so instant on rerenders
+        const [bg, ...layerImgs] = await Promise.all([
+            loadImage('/avatar/bgc.jpg'),
+            ...snapshot.map(layer => loadImage(layer.src)),
+        ]);
         if (token !== renderToken) return;
 
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        // Only resize if dimensions actually changed (resizing clears the canvas)
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+        }
+
+        // Draw everything synchronously in one pass — no awaits, no partial frames
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bg, 0, 0, w, h);
 
-        for (const layer of snapshot) {
-            const img = await loadImage(layer.src);
-            if (token !== renderToken) return;
-
+        for (let i = 0; i < snapshot.length; i++) {
+            const layer = snapshot[i];
             const tmp = document.createElement('canvas');
-            tmp.width = canvas.width;
-            tmp.height = canvas.height;
+            tmp.width = w;
+            tmp.height = h;
             const tmpCtx = tmp.getContext('2d');
-            tmpCtx.drawImage(img, 0, 0, tmp.width, tmp.height);
+            tmpCtx.drawImage(layerImgs[i], 0, 0, w, h);
 
-            const imgData = tmpCtx.getImageData(0, 0, tmp.width, tmp.height);
+            const imgData = tmpCtx.getImageData(0, 0, w, h);
             const d = imgData.data;
-            for (let i = 0; i < d.length; i += 4) {
-                d[i]     = d[i]     * layer.r / 255 | 0;
-                d[i + 1] = d[i + 1] * layer.g / 255 | 0;
-                d[i + 2] = d[i + 2] * layer.b / 255 | 0;
+            for (let j = 0; j < d.length; j += 4) {
+                d[j]     = d[j]     * layer.r / 255 | 0;
+                d[j + 1] = d[j + 1] * layer.g / 255 | 0;
+                d[j + 2] = d[j + 2] * layer.b / 255 | 0;
             }
             tmpCtx.putImageData(imgData, 0, 0);
             ctx.drawImage(tmp, 0, 0);
