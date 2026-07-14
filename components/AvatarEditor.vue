@@ -1,12 +1,14 @@
 <template>
     <div class="editor-root">
-        <div class="avatar-container" tabindex="0" title="Right-click → Copy Image for full picture" @copy.prevent="exportAvatar('copy')">
-            <canvas ref="avatarCanvas" class="avatar-canvas"></canvas>
-        </div>
+        <div class="avatar-side">
+            <div class="avatar-container" tabindex="0" title="Right-click → Copy Image for full picture" @copy.prevent="exportAvatar('copy')">
+                <canvas ref="avatarCanvas" class="avatar-canvas"></canvas>
+            </div>
 
-        <div class="avatar-export">
-            <button class="export-btn" @click="exportAvatar('download')">⬇ Download</button>
-            <button class="export-btn" @click="exportAvatar('copy')">⎘ Copy</button>
+            <div class="avatar-export">
+                <button class="export-btn" @click="exportAvatar('download')">⬇ Download</button>
+                <button class="export-btn" @click="exportAvatar('copy')">⎘ Copy</button>
+            </div>
         </div>
 
         <div class="avatar-config">
@@ -168,12 +170,19 @@
         align-items: flex-start;
     }
 
-    .avatar-container {
+    .avatar-side {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex-shrink: 0;
         width: 400px;
-        height: 400px;
+    }
+
+    .avatar-container {
+        width: 100%;
+        aspect-ratio: 1;
         border-radius: 12px;
         overflow: hidden;
-        flex-shrink: 0;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         outline: none;
         cursor: pointer;
@@ -307,5 +316,22 @@
         background: #222;
         color: white;
         border-color: #222;
+    }
+
+    @media (max-width: 640px) {
+        .editor-root {
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        .avatar-side {
+            width: 100%;
+        }
+
+        .avatar-config {
+            max-height: none;
+            width: 100%;
+        }
     }
 </style>
