@@ -65,6 +65,7 @@
     const groups = ref(avatar.groups);
     const colors = ref(data.color_options);
     const avatarCanvas = ref(null);
+    const exportScale = 2; // export resolution multiplier (change this to adjust output size)
     let renderToken = 0;
 
     const imageCache = new Map();
@@ -91,8 +92,8 @@
         if (token !== renderToken) return;
 
         // Only resize if dimensions actually changed (resizing clears the canvas)
-        const w = canvas.offsetWidth;
-        const h = canvas.offsetHeight;
+        const w = Math.round(canvas.offsetWidth * exportScale);
+        const h = Math.round(canvas.offsetHeight * exportScale);
         if (canvas.width !== w || canvas.height !== h) {
             canvas.width = w;
             canvas.height = h;
@@ -130,13 +131,58 @@
         drawAvatar(avatarCanvas.value, snapshot);
     });
 
+    async function renderBlob(snapshot) {
+        const [bg, ...layerImgs] = await Promise.all([
+            loadImage('/avatar/bgc.jpg'),
+            ...snapshot.map(l => loadImage(l.src)),
+        ]);
+
+        const displayCanvas = avatarCanvas.value;
+        const w = Math.round((displayCanvas?.offsetWidth  || bg.naturalWidth)  * exportScale);
+        const h = Math.round((displayCanvas?.offsetHeight || bg.naturalHeight) * exportScale);
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = w;
+        exportCanvas.height = h;
+        const ctx = exportCanvas.getContext('2d');
+        ctx.drawImage(bg, 0, 0, w, h);
+
+        for (let i = 0; i < snapshot.length; i++) {
+            const layer = snapshot[i];
+            const tmp = document.createElement('canvas');
+            tmp.width = w;
+            tmp.height = h;
+            const tmpCtx = tmp.getContext('2d');
+            tmpCtx.drawImage(layerImgs[i], 0, 0, w, h);
+
+            const imgData = tmpCtx.getImageData(0, 0, w, h);
+            const d = imgData.data;
+            for (let j = 0; j < d.length; j += 4) {
+                d[j]     = d[j]     * layer.r / 255 | 0;
+                d[j + 1] = d[j + 1] * layer.g / 255 | 0;
+                d[j + 2] = d[j + 2] * layer.b / 255 | 0;
+            }
+            tmpCtx.putImageData(imgData, 0, 0);
+            ctx.drawImage(tmp, 0, 0);
+        }
+
+        return new Promise(res => exportCanvas.toBlob(res, 'image/png'));
+    }
+
     async function exportAvatar(mode = 'download') {
-        const canvas = avatarCanvas.value;
-        if (!canvas) return;
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+        const snapshot = [...groups.value]
+            .filter(g => g.active)
+            .sort((a, b) => a.index - b.index)
+            .map(g => ({ src: g.getActiveFilepath(), r: g.active.r, g: g.active.g, b: g.active.b }));
+
         if (mode === 'copy') {
-            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            // Must call clipboard.write() before any await so the user-gesture
+            // permission context is still active. ClipboardItem accepts a Promise<Blob>,
+            // keeping the permission open while rendering completes asynchronously.
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': renderBlob(snapshot) }),
+            ]);
         } else {
+            const blob = await renderBlob(snapshot);
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
