@@ -1,7 +1,7 @@
 <template>
     <div class="editor-root">
         <div class="avatar-side">
-            <div class="avatar-container" tabindex="0" title="Right-click → Copy Image for full picture" @copy.prevent="exportAvatar('copy')">
+            <div class="avatar-container" tabindex="0" @copy.prevent="exportAvatar('copy')">
                 <canvas ref="avatarCanvas" class="avatar-canvas"></canvas>
             </div>
 
@@ -231,11 +231,6 @@
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         outline: none;
-        cursor: pointer;
-    }
-
-    .avatar-container:focus {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 0 0 3px rgba(49, 130, 206, 0.5);
     }
 
     .avatar-canvas {
