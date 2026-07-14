@@ -4,6 +4,20 @@
             "name": "head",
             "contents": [
                 {
+                    "name": "Head A",
+                    "filename": "head a.png",
+                    "r": 255,
+                    "g": 220,
+                    "b": 185
+                },
+                {
+                    "name": "Head B",
+                    "filename": "head b.png",
+                    "r": 255,
+                    "g": 220,
+                    "b": 185
+                },
+                {
                     "name": "Default",
                     "filename": "default.png",
                     "r": 255,
@@ -20,8 +34,55 @@
             ]
         },
         {
+            "name": "face",
+            "contents": [
+                 {
+                    "name": "Face A",
+                    "filename": "face a.png",
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
+                },
+                {
+                    "name": "Face B",
+                    "filename": "face b.png",
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
+                },
+                {
+                    "name": "Default",
+                    "filename": "default.png",
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
+                },
+                {
+                    "name": "Pretty",
+                    "filename": "pretty.png",
+                    "r": 255,
+                    "g": 210,
+                    "b": 180
+                }               
+            ]
+        },
+        {
             "name": "hair",
             "contents": [
+                {
+                    "name": "Hair A",
+                    "filename": "hair a.png",
+                    "r": 30,
+                    "g": 20,
+                    "b": 10
+                },
+                {
+                    "name": "Hair B",
+                    "filename": "hair b.png",
+                    "r": 30,
+                    "g": 20,
+                    "b": 10
+                },
                 {
                     "name": "Short",
                     "filename": "short.png",
@@ -39,21 +100,14 @@
             ]
         },
         {
-            "name": "face",
+            "name": "body",
             "contents": [
                 {
-                    "name": "Default",
-                    "filename": "default.png",
-                    "r": 255,
-                    "g": 210,
-                    "b": 180
-                },
-                {
-                    "name": "Pretty",
-                    "filename": "pretty.png",
-                    "r": 255,
-                    "g": 210,
-                    "b": 180
+                    "name": "T-Shirt",
+                    "filename": "tshirt.png",
+                    "r": 100,
+                    "g": 140,
+                    "b": 220
                 }
             ]
         }
